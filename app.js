@@ -101,6 +101,28 @@ app.patch("/api/v1/tours/:id", (req, res) => {
   })
 })
 
+app.delete("/api/v1/tours/:id", (req, res) => {
+  const id = Number(req.params.id)
+  const tour = tours.find(t => t.id === id)
+  if (!tour) {
+    res.status(404).json({
+      status: "Not Found",
+      message: "Tour not found!"
+    })
+    return
+  }
+
+  const newTours = tours.filter(t => t.id !== id)
+
+  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(newTours), err => {
+    console.log("Tour has been deleted successfully")
+  })
+
+  res.status(204).json({
+    status: "Success",
+  })
+})
+
 // starting the server
 app.listen(3000, () => {
   console.log("Backend server is running on port 3000");
