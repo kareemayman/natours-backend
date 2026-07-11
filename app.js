@@ -68,6 +68,39 @@ app.post("/api/v1/tours", (req, res) => {
   })
 })
 
+app.patch("/api/v1/tours/:id", (req, res) => {
+  if (!req.body) {
+    res.status(400).json({
+      status: "Bad Request",
+      message: "malformed/missing request data"
+    })
+    return
+  }
+
+  const id  = Number(req.params.id)
+  const tour = tours.find(t => t.id === id)
+
+  if (!tour) {
+    res.status(404).json({
+      status: "Not Found",
+      message: "Tour not found!"
+    })
+    return
+  }
+
+  const newTour = {...tour, ...req.body}
+  const newTours = tours.map(t => t.id === id ? newTour : t)
+
+  fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(newTours), err => {
+    console.log("Tour has been patched successfully")
+  })
+
+  res.status(200).json({
+    status: "Success",
+    data: newTour
+  })
+})
+
 // starting the server
 app.listen(3000, () => {
   console.log("Backend server is running on port 3000");
