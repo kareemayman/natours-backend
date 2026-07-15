@@ -1,9 +1,12 @@
 const express = require('express')
 const userController = require('../controllers/userController')
 
-const usersRouter = express.Router()
+const router = express.Router()
 
-usersRouter.route("/").get(userController.getAllUsers).post(userController.createUser)
-usersRouter.route("/:id").get(userController.getSingleUser).patch(userController.updateUser).delete(userController.deleteUser)
+// param middleware for id validation
+router.param('id', userController.checkId)
 
-module.exports = usersRouter
+router.route("/").get(userController.getAllUsers).post(userController.createUser)
+router.route("/:id").get(userController.getSingleUser).patch(userController.updateUser).delete(userController.deleteUser)
+
+module.exports = router

@@ -2,6 +2,18 @@ const fs = require("fs");
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+exports.checkId = (req, res, next, val) => {
+  const id = Number(val)
+  const tour = tours.find(t => t.id === id)
+  if (!tour) {
+    return res.status(404).json({
+      status: "Not Found",
+      message: "Tour not found!",
+    });
+  }
+  next()
+}
+
 exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: "Success",
@@ -15,14 +27,6 @@ exports.getAllTours = (req, res) => {
 exports.getSingleTour = (req, res) => {
   const id = Number(req.params.id);
   const tour = tours.find((t) => t.id === id);
-
-  if (!tour) {
-    res.status(404).json({
-      status: "Not Found",
-      message: "Tour not found!",
-    });
-    return;
-  }
 
   res.status(200).json({
     status: "Success",
@@ -67,14 +71,6 @@ exports.updateTour = (req, res) => {
   const id = Number(req.params.id);
   const tour = tours.find((t) => t.id === id);
 
-  if (!tour) {
-    res.status(404).json({
-      status: "Not Found",
-      message: "Tour not found!",
-    });
-    return;
-  }
-
   const newTour = { ...tour, ...req.body };
   const newTours = tours.map((t) => (t.id === id ? newTour : t));
 
@@ -91,13 +87,6 @@ exports.updateTour = (req, res) => {
 exports.deleteTour = (req, res) => {
   const id = Number(req.params.id);
   const tour = tours.find((t) => t.id === id);
-  if (!tour) {
-    res.status(404).json({
-      status: "Not Found",
-      message: "Tour not found!",
-    });
-    return;
-  }
 
   const newTours = tours.filter((t) => t.id !== id);
 

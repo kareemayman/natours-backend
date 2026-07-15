@@ -2,6 +2,17 @@ const fs = require("fs");
 
 const users = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/users.json`))
 
+exports.checkId = (req, res, next, val) => {
+  const user = users.find(u => u._id === val)
+  if(!user) {
+    return res.status(404).json({
+      status: "Not Found",
+      message: "User not found!",
+    })
+  }
+  next()
+}
+
 exports.getAllUsers = (req, res) => {
   res.status(200).json({
     status: "Success",
@@ -41,14 +52,6 @@ exports.getSingleUser = (req, res) => {
   const id = req.params.id
   const user = users.find(u => u._id === id)
 
-  if(!user) {
-    res.status(404).json({
-      status: "Not Found",
-      message: "User not found!",
-    })
-    return
-  }
-
   res.status(200).json({
     status: "Success", 
     data: {
@@ -60,14 +63,6 @@ exports.getSingleUser = (req, res) => {
 exports.updateUser = (req, res) => {
   const id = req.params.id
   const user = users.find(u => u._id === id)
-
-  if(!user) {
-    res.status(404).json({
-      status: "Not Found",
-      message: "User not found!",
-    })
-    return
-  }
 
   if (!req.body) {
     res.status(400).json({
@@ -92,16 +87,6 @@ exports.updateUser = (req, res) => {
 
 exports.deleteUser = (req, res) => {
   const id = req.params.id
-  const user = users.find(u => u._id === id)
-
-  if(!user) {
-    res.status(404).json({
-      status: "Not Found",
-      message: "User not found!",
-    })
-    return
-  }
-
   const newUsers = users.filter(u => u._id !== id)
 
   fs.writeFile(`${__dirname}/../dev-data/data/users.json`, JSON.stringify(newUsers), err => {
