@@ -14,6 +14,16 @@ exports.checkId = (req, res, next, val) => {
   next()
 }
 
+exports.checkBody = (req, res, next) => {
+  if (!req.body || !req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: "Bad Request",
+      message: "malformed/missing request data",
+    });
+  }
+  next()
+}
+
 exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: "Success",
@@ -37,14 +47,6 @@ exports.getSingleTour = (req, res) => {
 };
 
 exports.createTour = (req, res) => {
-  if (!req.body) {
-    res.status(400).json({
-      status: "Bad Request",
-      message: "malformed/missing request data",
-    });
-    return;
-  }
-
   const newId = tours[tours.length - 1].id + 1;
   const newTour = { ...req.body, id: newId };
   tours.push(newTour);
