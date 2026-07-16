@@ -6,7 +6,8 @@ const usersRouter = require('./routes/userRoutes')
 const app = express();
 
 // Use Morgan logging middleware
-app.use(morgan('dev'))
+if (process.env.NODE_ENV === 'development')
+  app.use(morgan('dev'))
 
 // express.json middleware
 app.use(express.json());
