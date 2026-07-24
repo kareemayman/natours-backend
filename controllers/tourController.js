@@ -1,18 +1,19 @@
+const Tour = require("../models/tourModel")
 const fs = require("fs");
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
-exports.checkId = (req, res, next, val) => {
-  const id = Number(val)
-  const tour = tours.find(t => t.id === id)
-  if (!tour) {
-    return res.status(404).json({
-      status: "Not Found",
-      message: "Tour not found!",
-    });
-  }
-  next()
-}
+// exports.checkId = (req, res, next, val) => {
+//   const id = Number(val)
+//   const tour = tours.find(t => t.id === id)
+//   if (!tour) {
+//     return res.status(404).json({
+//       status: "Not Found",
+//       message: "Tour not found!",
+//     });
+//   }
+//   next()
+// }
 
 exports.checkBody = (req, res, next) => {
   if (!req.body || !req.body.name || !req.body.price) {
