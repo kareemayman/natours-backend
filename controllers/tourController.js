@@ -3,28 +3,6 @@ const fs = require("fs");
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
-// exports.checkId = (req, res, next, val) => {
-//   const id = Number(val)
-//   const tour = tours.find(t => t.id === id)
-//   if (!tour) {
-//     return res.status(404).json({
-//       status: "Not Found",
-//       message: "Tour not found!",
-//     });
-//   }
-//   next()
-// }
-
-exports.checkBody = (req, res, next) => {
-  if (!req.body || !req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: "Bad Request",
-      message: "malformed/missing request data",
-    });
-  }
-  next()
-}
-
 exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: "Success",
@@ -47,19 +25,19 @@ exports.getSingleTour = (req, res) => {
   });
 };
 
-exports.createTour = (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = { ...req.body, id: newId };
-  tours.push(newTour);
-
-  fs.writeFile(`${__dirname}/../dev-data/data/tours-simple.json`, JSON.stringify(tours), (err) => {
-    console.log("new tour has been written to the file");
-  });
-
-  res.status(201).json({
-    status: "Success",
-    data: newTour,
-  });
+exports.createTour = async (req, res) => {
+  try {
+    const newTour = await Tour.create(req.body)
+    res.status(201).json({
+      status: "Success",
+      data: newTour,
+    })
+  } catch (err) {
+    res.status(400).json({
+      status: "Bad Request",
+      message: "malformed/missing request data",
+    })
+  } 
 };
 
 exports.updateTour = (req, res) => {
