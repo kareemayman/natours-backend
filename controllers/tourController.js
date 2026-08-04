@@ -33,7 +33,7 @@ exports.getSingleTour = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: "Fail",
-      message: "Couldn't find tour!"
+      message: "Couldn't find tour!",
     })
   }
 }
@@ -53,33 +53,23 @@ exports.createTour = async (req, res) => {
   }
 }
 
-exports.updateTour = (req, res) => {
-  if (!req.body) {
+exports.updateTour = async (req, res) => {
+  try {
+    const newTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      returnDocument: "after",
+      runValidators: true,
+    })
+
+    res.status(200).json({
+      status: "Success",
+      data: newTour,
+    })
+  } catch (err) {
     res.status(400).json({
       status: "Bad Request",
       message: "malformed/missing request data",
     })
-    return
   }
-
-  const id = Number(req.params.id)
-  const tour = tours.find((t) => t.id === id)
-
-  const newTour = { ...tour, ...req.body }
-  const newTours = tours.map((t) => (t.id === id ? newTour : t))
-
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(newTours),
-    (err) => {
-      console.log("Tour has been patched successfully")
-    },
-  )
-
-  res.status(200).json({
-    status: "Success",
-    data: newTour,
-  })
 }
 
 exports.deleteTour = (req, res) => {
