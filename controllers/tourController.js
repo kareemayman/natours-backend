@@ -72,21 +72,16 @@ exports.updateTour = async (req, res) => {
   }
 }
 
-exports.deleteTour = (req, res) => {
-  const id = Number(req.params.id)
-  const tour = tours.find((t) => t.id === id)
-
-  const newTours = tours.filter((t) => t.id !== id)
-
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/tours-simple.json`,
-    JSON.stringify(newTours),
-    (err) => {
-      console.log("Tour has been deleted successfully")
-    },
-  )
-
-  res.status(204).json({
-    status: "Success",
-  })
+exports.deleteTour = async (req, res) => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id)
+    res.status(204).json({
+      status: "Success",
+    })
+  } catch (err) {
+    res.status(404).json({
+      status: "Fail",
+      message: "Couldn't find tour!",
+    })
+  }
 }
