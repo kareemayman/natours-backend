@@ -5,11 +5,18 @@ const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-si
 
 exports.getAllTours = async (req, res) => {
   try {
+    // Filtering
     const queryObj = { ...req.query }
     const excludedFields = ["sort", "limit", "page", "fields"]
     excludedFields.forEach((f) => delete queryObj[f])
-    const query = Tour.find(queryObj)
+
+    // Advanced filtering
+    let queryString = JSON.stringify(queryObj)
+    queryString = queryString.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`)
+    const query = Tour.find(JSON.parse(queryString))
     // sorting code will be added here before executing the query
+
+    // Executing the query
     const tours = await query
     res.status(200).json({
       status: "Success",
