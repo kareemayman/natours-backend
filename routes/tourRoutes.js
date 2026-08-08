@@ -7,6 +7,7 @@ const router = express.Router()
 // router.param('id', tourController.checkId)
 
 router.route("/").get(tourController.getAllTours).post(tourController.createTour)
+router.route("/stats").get(tourController.getTourStats) // Aggregate Pipeline To Get Tours Stats
 router
   .route("/:id")
   .get(tourController.getSingleTour)
