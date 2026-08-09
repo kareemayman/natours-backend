@@ -15,7 +15,8 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.8.0",
-    "morgan": "^1.11.0"
+    "morgan": "^1.11.0",
+    "slugify": "^1.6.9"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

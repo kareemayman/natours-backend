@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const slugify = require("slugify")
 
 const tourSchema = new mongoose.Schema(
   {
@@ -57,12 +58,18 @@ const tourSchema = new mongoose.Schema(
       required: [true, "a tour must have imageCover"],
     },
     priceDiscount: Number,
+    slug: String,
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 )
+
+// DOCUMENT MIDDLEWARE: runs before .save() and .create()
+tourSchema.pre("save", function () {
+  this.slug = slugify(this.name, { lower: true })
+})
 
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7
