@@ -80,6 +80,11 @@ tourSchema.pre(/^find/, function () {
   this.find({ secretTour: { $ne: true } })
 })
 
+// AGGREGATION MIDDLEWARE
+tourSchema.pre("aggregate", function () {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
+})
+
 // Virtual property: durationWeeks
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7
