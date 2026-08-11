@@ -76,7 +76,7 @@ tourSchema.pre("save", function () {
 })
 
 // QUERY MIDDLEWARE: runs before queries
-tourSchema.pre("find", function () {
+tourSchema.pre(/^find/, function () {
   this.find({ secretTour: { $ne: true } })
 })
 
