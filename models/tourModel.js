@@ -59,6 +59,10 @@ const tourSchema = new mongoose.Schema(
     },
     priceDiscount: Number,
     slug: String,
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -71,6 +75,12 @@ tourSchema.pre("save", function () {
   this.slug = slugify(this.name, { lower: true })
 })
 
+// QUERY MIDDLEWARE: runs before queries
+tourSchema.pre("find", function () {
+  this.find({ secretTour: { $ne: true } })
+})
+
+// Virtual property: durationWeeks
 tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7
 })
