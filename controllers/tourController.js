@@ -71,7 +71,7 @@ exports.updateTour = async (req, res) => {
   } catch (err) {
     res.status(400).json({
       status: "Bad Request",
-      message: "malformed/missing request data",
+      message: err.message,
     })
   }
 }
