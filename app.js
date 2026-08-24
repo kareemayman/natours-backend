@@ -20,4 +20,12 @@ app.use(express.json());
 app.use('/api/v1/tours', toursRouter)
 app.use('/api/v1/users', usersRouter)
 
+// Unhandled routes — runs only if nothing above matched
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on the server!`
+  })
+})
+
 module.exports = app
