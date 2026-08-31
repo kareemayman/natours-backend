@@ -1,4 +1,4 @@
-const AppError = require('../utils/appError')
+const AppError = require("../utils/appError")
 
 const sendErrDev = (err, res) => {
   res.status(err.statusCode).json({
@@ -19,14 +19,18 @@ const sendErrProd = (err, res) => {
     console.error(err)
 
     res.status(500).json({
-      status: 'error',
-      message: 'Something went wrong!'
+      status: "error",
+      message: "Something went wrong!",
     })
   }
 }
 
-const handleCastErrorDB = err => {
+const handleCastErrorDB = (err) => {
   return new AppError(`Inavlid ${err.path}: ${err.value}`, 400)
+}
+
+const handleDuplicateFieldsDB = (err) => {
+  return new AppError(`Duplicate field value: ${JSON.stringify(err.keyValue)}`, 400)
 }
 
 module.exports = (err, req, res, next) => {
@@ -36,9 +40,12 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendErrDev(err, res)
   } else if (process.env.NODE_ENV === "production") {
-    let error = {...err}
-    if (err.name === 'CastError') {
+    let error = { ...err }
+    if (err.name === "CastError") {
       error = handleCastErrorDB(err)
+    }
+    if (err.code === 11000) {
+      error = handleDuplicateFieldsDB(err)
     }
     sendErrProd(error, res)
   }
