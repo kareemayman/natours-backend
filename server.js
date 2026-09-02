@@ -1,5 +1,12 @@
 const mongoose = require("mongoose")
 const dotenv = require("dotenv")
+
+// handle uncaught exceptions (async code bugs)
+process.on("uncaughtException", (err) => {
+  console.log(err.name, err.message)
+  process.exit(1) // code 1 for uncalled exception
+})
+
 dotenv.config({ path: "./config.env" })
 const app = require("./app")
 
