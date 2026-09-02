@@ -26,11 +26,15 @@ const sendErrProd = (err, res) => {
 }
 
 const handleCastErrorDB = (err) => {
-  return new AppError(`Inavlid ${err.path}: ${err.value}`, 400)
+  return new AppError(`Invalid ${err.path}: ${err.value}`, 400)
 }
 
 const handleDuplicateFieldsDB = (err) => {
   return new AppError(`Duplicate field value: ${JSON.stringify(err.keyValue)}`, 400)
+}
+
+const handleValidationError = (err) => {
+  return new AppError(err.message, 400)
 }
 
 module.exports = (err, req, res, next) => {
@@ -46,6 +50,9 @@ module.exports = (err, req, res, next) => {
     }
     if (err.code === 11000) {
       error = handleDuplicateFieldsDB(err)
+    }
+    if (err.name === "ValidationError") {
+      error = handleValidationError(err)
     }
     sendErrProd(error, res)
   }
