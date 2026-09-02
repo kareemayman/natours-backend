@@ -8,11 +8,16 @@ const DB = process.env.DATABASE_CONNECTION_STRING.replace(
   process.env.MONGODB_PASSWORD,
 )
 
-mongoose
-  .connect(DB)
-  .then((con) => console.log("Connected to MongoDB Atlas"))
-  .catch((err) => console.error("Connection error:", err))
+mongoose.connect(DB).then((con) => console.log("Connected to MongoDB Atlas"))
 
-app.listen(process.env.PORT || 3000, () => {
+const server = app.listen(process.env.PORT || 3000, () => {
   console.log("Backend server is running on port 3000")
+})
+
+process.on("unhandledRejection", (err) => {
+  console.log(err.name, err.message)
+  // shut the server gracefully first then end the application
+  server.close(() => {
+    process.exit(1) // code 1 for uncalled exception
+  })
 })
