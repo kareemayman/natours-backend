@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const validator = require("validator")
+const bcrypt = require("bcryptjs")
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -54,6 +55,16 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
     select: false, // Hide this field and only use internally
   },
+})
+
+userSchema.pre("save", async function () {
+  // Only run this prehook when the password is actually updated
+  if (!this.isModified("password")) return
+
+  // hash is the async method and 2 params are the password and salt cost (complexity)
+  this.password = await bcrypt.hash(this.password, 12)
+  // delete passwordConfirm field
+  this.passwordConfirm = undefined
 })
 
 const User = mongoose.model("User", userSchema)
