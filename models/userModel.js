@@ -1,11 +1,11 @@
 const mongoose = require("mongoose")
+const validator = require("validator")
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "a user must have a name!"],
-    trim: true,
-    minLength: [4, "Name must be at least 10 characters"],
+    minLength: [4, "Name must be at least 4 characters"],
     maxLength: [40, "Name must be maximum 40 characters"],
   },
   email: {
@@ -13,8 +13,10 @@ const userSchema = new mongoose.Schema({
     unique: true,
     required: [true, "a user must have an email"],
     trim: true,
-    minLength: [10, "Email must be at least 10 characters"],
+    minLength: [8, "Email must be at least 8 characters"],
     maxLength: [80, "Email must be maximum 80 characters"],
+    lowercase: true,
+    validate: [validator.isEmail, "Please enter a valid email"],
   },
   role: {
     type: String,
@@ -29,23 +31,22 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  photo: {
-    type: String,
-    trim: true,
-  },
+  photo: String,
   password: {
     type: String,
     required: [true, "User must have a password"],
-    trim: true,
-    minLength: [12, "Password must be at least 10 characters"],
-    maxLength: [80, "Password must be maximum 80 characters"],
+    minLength: [8, "Password must be at least 8 characters"],
+  },
+  passwordConfirm: {
+    type: String,
+    required: [true, "Please confirm your password"],
+    minLength: [8, "Password must be at least 8 characters"],
   },
   createdAt: {
     type: Date,
     default: Date.now,
     select: false, // Hide this field and only use internally
   },
-  slug: String,
 })
 
 const User = mongoose.model("User", userSchema)
