@@ -41,6 +41,13 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please confirm your password"],
     minLength: [8, "Password must be at least 8 characters"],
+    // This validation only works on save or create
+    validate: {
+      validator: function (el) {
+        return el === this.password
+      },
+      message: "Passwords do not match",
+    },
   },
   createdAt: {
     type: Date,
