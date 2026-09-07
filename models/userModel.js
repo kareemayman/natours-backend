@@ -68,6 +68,11 @@ userSchema.pre("save", async function () {
   this.passwordConfirm = undefined
 })
 
+// Instance method to compare passwords
+userSchema.methods.comparePassword = async function (candidate, hashed) {
+  return await bcrypt.compare(candidate, hashed)
+}
+
 const User = mongoose.model("User", userSchema)
 
 module.exports = User

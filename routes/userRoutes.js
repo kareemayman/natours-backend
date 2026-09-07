@@ -8,6 +8,7 @@ const router = express.Router()
 // router.param('id', userController.checkId)
 
 router.post("/signup", authController.signUp) // special endpoint for signing up new users
+router.post("/login", authController.login)
 
 router.route("/").get(userController.getAllUsers).post(userController.createUser)
 router
