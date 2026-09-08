@@ -45,3 +45,37 @@ exports.login = async (req, res, next) => {
     token,
   })
 }
+
+exports.protect = async (req, res, next) => {
+  // Checking if token exists
+  let token
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1]
+  }
+  if (!token)
+    return next(new AppError("You're not logged in! Please log in to access this resource.", 401))
+
+  // Token Verification
+  let verifiedToken
+  try {
+    verifiedToken = await jose.jwtVerify(token, secret, {
+      algorithms: ["HS256"],
+    })
+  } catch (err) {
+    return next(new AppError("Invalid or expired token. Please log in again.", 401))
+  }
+
+  const { payload } = verifiedToken
+  req.userId = payload.userId
+
+  // Check if user still exists
+  const currentUser = await User.findById(payload.userId)
+  if (!currentUser) return next(new AppError("User no longer exists.", 401))
+
+  // Check if password isn't changed
+  if (currentUser.changedPasswordAfter(payload.iat))
+    return next(new AppError("Password changed recently. Please log in again.", 401))
+
+  req.user = currentUser
+  next()
+}

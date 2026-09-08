@@ -56,11 +56,14 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
     select: false, // Hide this field and only use internally
   },
+  passwordChangedAt: Date,
 })
 
 userSchema.pre("save", async function () {
   // Only run this prehook when the password is actually updated
   if (!this.isModified("password")) return
+
+  if (!this.isNew) this.passwordChangedAt = Date.now() - 1000 // if not a new document, updated password
 
   // hash is the async method and 2 params are the password and salt cost (complexity)
   this.password = await bcrypt.hash(this.password, 12)
@@ -71,6 +74,15 @@ userSchema.pre("save", async function () {
 // Instance method to compare passwords
 userSchema.methods.comparePassword = async function (candidate, hashed) {
   return await bcrypt.compare(candidate, hashed)
+}
+
+// Instance method to check if the user has changed their password after the token was issued
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10) // convert to seconds, base 10
+    return JWTTimestamp < changedTimestamp
+  }
+  return false
 }
 
 const User = mongoose.model("User", userSchema)
