@@ -1,6 +1,7 @@
 const User = require("../models/userModel")
 const jose = require("jose")
 const AppError = require("../utils/appError")
+const { sendResetEmail } = require("../utils/mailer")
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET) // encode it for jose
 
@@ -86,5 +87,34 @@ exports.restrictTo = (...roles) => {
       return next(new AppError("You are not allowed to perform this action.", 403))
     }
     next()
+  }
+}
+
+exports.forgotPassword = async (req, res, next) => {
+  // Validate email exists
+  if (!req.body || !req.body.email)
+    return next(new AppError("Please provide an email address", 400))
+
+  // Get user
+  const user = await User.findOne({ email: req.body.email })
+  if (!user) return next(new AppError("There's no user with that email address!", 404))
+
+  // Generate random reset token
+  const resetToken = user.createPasswordResetToken()
+  await user.save({ validateBeforeSave: false }) // save the user with the reset token and expiration date
+
+  // Send it to user's email
+  const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`
+  try {
+    await sendResetEmail(user.email, resetUrl)
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to email!",
+    })
+  } catch (err) {
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save({ validateBeforeSave: false })
+    return next(new AppError("Error sending email. Please try again later.", 500))
   }
 }
