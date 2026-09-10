@@ -2,6 +2,7 @@ const User = require("../models/userModel")
 const jose = require("jose")
 const AppError = require("../utils/appError")
 const { sendResetEmail } = require("../utils/mailer")
+const crypto = require("crypto")
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET) // encode it for jose
 
@@ -117,4 +118,40 @@ exports.forgotPassword = async (req, res, next) => {
     await user.save({ validateBeforeSave: false })
     return next(new AppError("Error sending email. Please try again later.", 500))
   }
+}
+
+exports.resetPassword = async (req, res, next) => {
+  // Get token and validate it
+  if (!req.params.token) return next(new AppError("Please provide a token", 400))
+
+  // Get user based on the token
+  const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex")
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  })
+
+  if (!user) return next(new AppError("Token is invalid or has expired", 400))
+
+  // Update password
+  if (!req.body || !req.body.password || !req.body.passwordConfirm)
+    return next(new AppError("Please provide a new password and confirm it", 400))
+
+  user.password = req.body.password
+  user.passwordConfirm = req.body.passwordConfirm
+  user.passwordResetToken = undefined
+  user.passwordResetExpires = undefined
+  await user.save()
+
+  // Log the user in, send JWT
+  const token = await new jose.SignJWT({ userId: user._id.toString() })
+    .setProtectedHeader({ alg: "HS256" }) // declare th signing algo
+    .setIssuedAt()
+    .setExpirationTime(process.env.JWT_EXPIRES_IN)
+    .sign(secret)
+
+  res.status(200).json({
+    status: "success",
+    token,
+  })
 }
