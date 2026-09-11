@@ -1,5 +1,6 @@
 const User = require("../models/userModel")
 const AppError = require("../utils/appError")
+const APIFeatures = require("../utils/apiFeatures")
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {}
@@ -9,11 +10,15 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj
 }
 
-exports.getAllUsers = (req, res) => {
+exports.getAllUsers = async (req, res) => {
+  const features = new APIFeatures(User.find(), req.query).filter().sort().limitFields().paginate()
+  const users = await features.query
+
   res.status(200).json({
     status: "Success",
+    results: users.length,
     data: {
-      users: "users",
+      users,
     },
   })
 }

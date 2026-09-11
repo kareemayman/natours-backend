@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
+    select: false, // hide this field and only use internally
   },
   photo: String,
   password: {
@@ -72,6 +73,10 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, 12)
   // delete passwordConfirm field
   this.passwordConfirm = undefined
+})
+
+userSchema.pre(/^find/, function () {
+  this.find({ active: true }) // only find users that are active
 })
 
 // Instance method to compare passwords
