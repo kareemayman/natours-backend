@@ -1,99 +1,94 @@
-const fs = require("fs");
+const User = require("../models/userModel")
+const AppError = require("../utils/appError")
 
-const users = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/users.json`))
-
-// exports.checkId = (req, res, next, val) => {
-//   const user = users.find(u => u._id === val)
-//   if(!user) {
-//     return res.status(404).json({
-//       status: "Not Found",
-//       message: "User not found!",
-//     })
-//   }
-//   next()
-// }
+const filterObj = (obj, ...allowedFields) => {
+  const newObj = {}
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) newObj[el] = obj[el]
+  })
+  return newObj
+}
 
 exports.getAllUsers = (req, res) => {
   res.status(200).json({
     status: "Success",
-    results: Array.isArray(users) ? users.length : 0,
     data: {
-      users
-    }
+      users: "users",
+    },
   })
 }
 
 exports.createUser = (req, res) => {
-  if (!req.body) {
-    res.status(400).json({
-      status: "Bad Request",
-      message: "malformed/missing request data",
-    });
-    return;
-  }
-
-  const id = crypto.randomUUID()
-  const newUser = {...req.body, _id: id}
-
-  users.push(newUser)
-  fs.writeFile(`${__dirname}/../dev-data/data/users.json`, JSON.stringify(users), err => {
-    console.log('users file updated successfully')
-  })
-
   res.status(201).json({
     status: "Success",
     data: {
-      user: newUser
-    }
+      user: "newUser",
+    },
   })
 }
 
 exports.getSingleUser = (req, res) => {
   const id = req.params.id
-  const user = users.find(u => u._id === id)
-
-  res.status(200).json({
-    status: "Success", 
-    data: {
-      user
-    }
-  })
-}
-
-exports.updateUser = (req, res) => {
-  const id = req.params.id
-  const user = users.find(u => u._id === id)
-
-  if (!req.body) {
-    res.status(400).json({
-      status: "Bad Request",
-      message: "malformed/missing request data",
-    });
-    return;
-  }
-
-  const newUser = {...user, ...req.body}
-  const newUsers = users.map(u => u._id === id ? newUser : u)
-
-  fs.writeFile(`${__dirname}/../dev-data/data/users.json`, JSON.stringify(newUsers), err => {
-    console.log('users file updated successfully')
-  })
 
   res.status(200).json({
     status: "Success",
-    data: newUser,
-  });
+    data: {
+      user: `user with id ${id}`,
+    },
+  })
+}
+
+exports.updateUser = async (req, res, next) => {
+  if (!req.body) return next(new AppError("malformed/missing request data", 400))
+
+  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    returnDocument: "after",
+    runValidators: true,
+  })
+
+  if (!user) return next(new AppError("No user found with that ID", 404))
+
+  res.status(200).json({
+    status: "Success",
+    data: {
+      user,
+    },
+  })
 }
 
 exports.deleteUser = (req, res) => {
-  const id = req.params.id
-  const newUsers = users.filter(u => u._id !== id)
-
-  fs.writeFile(`${__dirname}/../dev-data/data/users.json`, JSON.stringify(newUsers), err => {
-    console.log('user deleted successfully')
+  res.status(204).json({
+    status: "Success",
   })
+}
+
+exports.updateMe = async (req, res, next) => {
+  if (!req.body) return next(new AppError("malformed/missing request data", 400))
+
+  if (req.body.password || req.body.passwordConfirm)
+    return next(
+      new AppError("This route is not for password updates. Please use /updateMyPassword.", 400),
+    )
+
+  const filteredBody = filterObj(req.body, "name", "email") // only allow name and email to be updated
+
+  const user = await User.findByIdAndUpdate(req.userId, filteredBody, {
+    returnDocument: "after",
+    runValidators: true,
+  })
+
+  res.status(200).json({
+    status: "Success",
+    data: {
+      user,
+    },
+  })
+}
+
+exports.deleteMe = async (req, res, next) => {
+  await User.findByIdAndUpdate(req.userId, { active: false })
 
   res.status(204).json({
     status: "Success",
-  });
+  })
 }
