@@ -16,7 +16,7 @@ exports.signUp = async (req, res) => {
   })
 
   const token = await new jose.SignJWT({ userId: newUser._id.toString() })
-    .setProtectedHeader({ alg: "HS256" }) // declare th signing algo
+    .setProtectedHeader({ alg: "HS256" }) // declare the signing algo
     .setIssuedAt()
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
@@ -37,7 +37,7 @@ exports.login = async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401))
 
   const token = await new jose.SignJWT({ userId: user._id.toString() })
-    .setProtectedHeader({ alg: "HS256" }) // declare th signing algo
+    .setProtectedHeader({ alg: "HS256" }) // declare the signing algo
     .setIssuedAt()
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
@@ -145,7 +145,34 @@ exports.resetPassword = async (req, res, next) => {
 
   // Log the user in, send JWT
   const token = await new jose.SignJWT({ userId: user._id.toString() })
-    .setProtectedHeader({ alg: "HS256" }) // declare th signing algo
+    .setProtectedHeader({ alg: "HS256" }) // declare the signing algo
+    .setIssuedAt()
+    .setExpirationTime(process.env.JWT_EXPIRES_IN)
+    .sign(secret)
+
+  res.status(200).json({
+    status: "success",
+    token,
+  })
+}
+
+// Update password for logged in users
+exports.updatePassword = async (req, res, next) => {
+  if (!req.body || !req.body.currentPassword || !req.body.password || !req.body.passwordConfirm)
+    return next(new AppError("Please provide current password, new password and confirm it", 400))
+
+  // Get user from collection (with password)
+  const user = await User.findById(req.userId).select("+password")
+
+  if (!(await user.comparePassword(req.body.currentPassword, user.password)))
+    return next(new AppError("Your current password is incorrect", 401))
+
+  user.password = req.body.password
+  user.passwordConfirm = req.body.passwordConfirm
+  await user.save()
+
+  const token = await new jose.SignJWT({ userId: user._id.toString() })
+    .setProtectedHeader({ alg: "HS256" }) // declare the signing algo
     .setIssuedAt()
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
