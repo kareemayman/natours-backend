@@ -1,12 +1,15 @@
 const express = require("express")
 const morgan = require("morgan")
 const rateLimit = require("express-rate-limit")
+const helmet = require("helmet")
 const AppError = require("./utils/appError")
 const globalErrorHandler = require("./controllers/errorController")
 const toursRouter = require("./routes/tourRoutes")
 const usersRouter = require("./routes/userRoutes")
 
 const app = express()
+
+app.use(helmet()) // Set security HTTP headers
 
 // Express 5 defaults to the 'simple' query parser, which leaves bracket
 // notation (?price[gte]=500) as a flat key. 'extended' uses qs to nest it.
