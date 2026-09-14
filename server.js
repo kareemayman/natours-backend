@@ -15,6 +15,8 @@ const DB = process.env.DATABASE_CONNECTION_STRING.replace(
   process.env.MONGODB_PASSWORD,
 )
 
+mongoose.set("sanitizeFilter", true) // sanitize query filter to prevent NoSQL injection
+
 mongoose.connect(DB).then((con) => console.log("Connected to MongoDB Atlas"))
 
 const server = app.listen(process.env.PORT || 3000, () => {

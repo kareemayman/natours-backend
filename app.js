@@ -2,6 +2,7 @@ const express = require("express")
 const morgan = require("morgan")
 const rateLimit = require("express-rate-limit")
 const helmet = require("helmet")
+const { xss } = require("express-xss-sanitizer")
 const AppError = require("./utils/appError")
 const globalErrorHandler = require("./controllers/errorController")
 const toursRouter = require("./routes/tourRoutes")
@@ -27,6 +28,9 @@ app.use("/api", limiter) // Apply rate limiting to all /api routes
 
 // express.json middleware
 app.use(express.json())
+
+// Data sanitization against XSS attacks
+app.use(xss())
 
 // Routes
 app.use("/api/v1/tours", toursRouter)
