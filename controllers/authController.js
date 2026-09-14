@@ -21,6 +21,12 @@ exports.signUp = async (req, res) => {
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
 
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // Set to true in production
+    maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 60 * 1000, // Convert hours to milliseconds
+  })
+
   res.status(201).json({
     status: "success",
     token,
@@ -41,6 +47,12 @@ exports.login = async (req, res, next) => {
     .setIssuedAt()
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
+
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 60 * 1000,
+  })
 
   res.status(201).json({
     status: "success",
@@ -150,6 +162,12 @@ exports.resetPassword = async (req, res, next) => {
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
 
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 60 * 1000,
+  })
+
   res.status(200).json({
     status: "success",
     token,
@@ -176,6 +194,12 @@ exports.updatePassword = async (req, res, next) => {
     .setIssuedAt()
     .setExpirationTime(process.env.JWT_EXPIRES_IN)
     .sign(secret)
+
+  res.cookie("jwt", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 60 * 1000,
+  })
 
   res.status(200).json({
     status: "success",
