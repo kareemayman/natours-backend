@@ -97,6 +97,12 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -111,7 +117,7 @@ tourSchema.pre("save", function () {
 
 // QUERY MIDDLEWARE: runs before queries
 tourSchema.pre(/^find/, function () {
-  this.find({ secretTour: { $ne: true } })
+  this.find({ secretTour: mongoose.trusted({ $ne: true }) })
 })
 
 // AGGREGATION MIDDLEWARE
