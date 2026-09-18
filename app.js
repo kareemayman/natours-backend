@@ -7,6 +7,7 @@ const AppError = require("./utils/appError")
 const globalErrorHandler = require("./controllers/errorController")
 const toursRouter = require("./routes/tourRoutes")
 const usersRouter = require("./routes/userRoutes")
+const reviewsRouter = require("./routes/reviewRoutes")
 
 const app = express()
 
@@ -35,6 +36,7 @@ app.use(xss())
 // Routes
 app.use("/api/v1/tours", toursRouter)
 app.use("/api/v1/users", usersRouter)
+app.use("/api/v1/reviews", reviewsRouter)
 
 // Unhandled routes — runs only if nothing above matched
 app.use((req, res, next) => {
