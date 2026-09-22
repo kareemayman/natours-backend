@@ -2,9 +2,9 @@ const express = require("express")
 const reviewController = require("../controllers/reviewController")
 const authController = require("../controllers/authController")
 
-const router = express.Router()
+const router = express.Router({ mergeParams: true })
 
-router.route("/").get(reviewController.getAllReviews)
+router.route("/").get(reviewController.getReviews)
 router
   .route("/:tourId")
   .post(authController.protect, authController.restrictTo("user"), reviewController.createReview)

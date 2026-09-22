@@ -3,25 +3,10 @@ const APIFeatures = require("../utils/apiFeatures")
 const AppError = require("../utils/appError")
 const Tour = require("../models/tourModel")
 
-exports.getAllReviews = async (req, res, next) => {
-  const features = new APIFeatures(Review.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate()
-  const reviews = await features.query.populate("tour")
-
-  res.status(200).json({
-    status: "success",
-    results: reviews.length,
-    data: {
-      reviews,
-    },
-  })
-}
-
 exports.getReviews = async (req, res, next) => {
-  const features = new APIFeatures(Review.find({ tour: req.params.tourId }), req.query)
+  const query = req.params.tourId ? { tour: req.params.tourId } : {}
+
+  const features = new APIFeatures(Review.find(query), req.query)
     .filter()
     .sort()
     .limitFields()
