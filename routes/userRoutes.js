@@ -22,7 +22,7 @@ router.route("/").get(userController.getAllUsers).post(userController.createUser
 router
   .route("/:id")
   .get(userController.getSingleUser)
-  .patch(authController.restrictTo("admin"), userController.updateUser)
-  .delete(authController.restrictTo("admin"), userController.deleteUser)
+  .patch(authController.protect, authController.restrictTo("admin"), userController.updateUser)
+  .delete(authController.protect, authController.restrictTo("admin"), userController.deleteUser)
 
 module.exports = router

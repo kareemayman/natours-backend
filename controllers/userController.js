@@ -1,6 +1,6 @@
 const User = require("../models/userModel")
 const AppError = require("../utils/appError")
-const APIFeatures = require("../utils/apiFeatures")
+const factory = require("./handlerFactory")
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {}
@@ -10,18 +10,7 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj
 }
 
-exports.getAllUsers = async (req, res) => {
-  const features = new APIFeatures(User.find(), req.query).filter().sort().limitFields().paginate()
-  const users = await features.query
-
-  res.status(200).json({
-    status: "Success",
-    results: users.length,
-    data: {
-      users,
-    },
-  })
-}
+exports.getAllUsers = factory.getAll(User)
 
 exports.createUser = (req, res) => {
   res.status(201).json({
@@ -43,29 +32,8 @@ exports.getSingleUser = (req, res) => {
   })
 }
 
-exports.updateUser = async (req, res, next) => {
-  if (!req.body) return next(new AppError("malformed/missing request data", 400))
-
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-    returnDocument: "after",
-    runValidators: true,
-  })
-
-  if (!user) return next(new AppError("No user found with that ID", 404))
-
-  res.status(200).json({
-    status: "Success",
-    data: {
-      user,
-    },
-  })
-}
-
-exports.deleteUser = (req, res) => {
-  res.status(204).json({
-    status: "Success",
-  })
-}
+exports.updateUser = factory.updateOne(User)
+exports.deleteUser = factory.deleteOne(User)
 
 exports.updateMe = async (req, res, next) => {
   if (!req.body) return next(new AppError("malformed/missing request data", 400))
