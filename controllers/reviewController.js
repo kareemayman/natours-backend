@@ -2,6 +2,7 @@ const Review = require("../models/reviewModel")
 const APIFeatures = require("../utils/apiFeatures")
 const AppError = require("../utils/appError")
 const Tour = require("../models/tourModel")
+const factory = require("./handlerFactory")
 
 exports.getReviews = async (req, res, next) => {
   const query = req.params.tourId ? { tour: req.params.tourId } : {}
@@ -43,3 +44,5 @@ exports.createReview = async (req, res, next) => {
     },
   })
 }
+
+exports.deleteReview = factory.deleteOne(Review)
