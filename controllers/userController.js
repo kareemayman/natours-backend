@@ -21,17 +21,7 @@ exports.createUser = (req, res) => {
   })
 }
 
-exports.getSingleUser = (req, res) => {
-  const id = req.params.id
-
-  res.status(200).json({
-    status: "Success",
-    data: {
-      user: `user with id ${id}`,
-    },
-  })
-}
-
+exports.getSingleUser = factory.getOne(User)
 exports.updateUser = factory.updateOne(User)
 exports.deleteUser = factory.deleteOne(User)
 

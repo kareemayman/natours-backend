@@ -4,6 +4,7 @@ const AppError = require("../utils/appError")
 const Tour = require("../models/tourModel")
 const factory = require("./handlerFactory")
 
+// Gets all reviews or reviews for a specific tour
 exports.getReviews = async (req, res, next) => {
   const query = req.params.tourId ? { tour: req.params.tourId } : {}
 
@@ -12,7 +13,15 @@ exports.getReviews = async (req, res, next) => {
     .sort()
     .limitFields()
     .paginate()
-  const reviews = await features.query
+
+  let reviews
+
+  // If a tourId is provided, we don't need to populate the tour field since we already know which tour it is
+  if (req.params.tourId) {
+    reviews = await features.query
+  } else {
+    reviews = await features.query.populate("tour")
+  }
 
   res.status(200).json({
     status: "success",
@@ -45,4 +54,6 @@ exports.createReview = async (req, res, next) => {
   })
 }
 
+exports.updateReview = factory.updateOne(Review)
 exports.deleteReview = factory.deleteOne(Review)
+exports.getSingleReview = factory.getOne(Review, "tour")
