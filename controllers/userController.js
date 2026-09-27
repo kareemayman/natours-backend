@@ -55,3 +55,8 @@ exports.deleteMe = async (req, res, next) => {
     status: "Success",
   })
 }
+
+exports.getMe = async (req, res, next) => {
+  req.params.id = req.userId
+  next()
+}
