@@ -10,13 +10,21 @@ router.use("/:tourId/reviews", reviewRouter)
 
 router
   .route("/")
-  .get(authController.protect, tourController.getAllTours)
-  .post(tourController.createTour)
+  .get(tourController.getAllTours)
+  .post(
+    authController.protect,
+    authController.restrictTo("admin", "lead-guide"),
+    tourController.createTour,
+  )
 router.route("/stats").get(tourController.getTourStats) // Aggregate Pipeline To Get Tours Stats
 router
   .route("/:id")
   .get(tourController.getSingleTour)
-  .patch(tourController.updateTour)
+  .patch(
+    authController.protect,
+    authController.restrictTo("admin", "lead-guide"),
+    tourController.updateTour,
+  )
   .delete(
     authController.protect,
     authController.restrictTo("admin", "lead-guide"),
