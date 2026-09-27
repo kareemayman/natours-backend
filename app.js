@@ -3,6 +3,7 @@ const morgan = require("morgan")
 const rateLimit = require("express-rate-limit")
 const helmet = require("helmet")
 const { xss } = require("express-xss-sanitizer")
+const expressMongoSanitize = require("@exortek/express-mongo-sanitize")
 const AppError = require("./utils/appError")
 const globalErrorHandler = require("./controllers/errorController")
 const toursRouter = require("./routes/tourRoutes")
@@ -29,6 +30,8 @@ app.use("/api", limiter) // Apply rate limiting to all /api routes
 
 // express.json middleware
 app.use(express.json())
+
+app.use(expressMongoSanitize()) // works with Express 5 — clones req instead of reassigning req.query
 
 // Data sanitization against XSS attacks
 app.use(xss())
