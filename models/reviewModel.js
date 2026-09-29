@@ -1,5 +1,5 @@
-// review, rating, createdAt, ref to tour, ref to user
 const mongoose = require("mongoose")
+const Tour = require("./tourModel")
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -34,6 +34,32 @@ const reviewSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   },
 )
+
+// static methods point to the model itself, not the document instance. So we can use this keyword to refer to the model in static methods
+reviewSchema.statics.getReviewStats = async function (tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: "$tour",
+        nRating: { $sum: 1 },
+        avgRating: { $avg: "$rating" },
+      },
+    },
+  ])
+
+  await Tour.findByIdAndUpdate(tourId, {
+    ratingsQuantity: stats.length > 0 ? stats[0].nRating : 0,
+    ratingsAverage: stats.length > 0 ? stats[0].avgRating : 4.5,
+  })
+}
+
+reviewSchema.post("save", async function () {
+  // this points towards current review document
+  await this.constructor.getReviewStats(this.tour)
+})
 
 reviewSchema.pre(/^find/, function () {
   this.populate({

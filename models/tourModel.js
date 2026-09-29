@@ -11,12 +11,6 @@ const tourSchema = new mongoose.Schema(
       minlength: [10, "Name must be at least 10 characters"],
       maxlength: [40, "Name must be maximum 40 characters"],
     },
-    rating: {
-      type: Number,
-      default: 4.5,
-      min: [1, "rating must be higher than or equal to 1.0"],
-      max: [5, "rating must be less than or equal to 5.0"],
-    },
     price: {
       type: Number,
       required: [true, "a tour must have a price!"],
