@@ -61,6 +61,14 @@ reviewSchema.post("save", async function () {
   await this.constructor.getReviewStats(this.tour)
 })
 
+// findOneAndUpdate and findOneAndDelete
+reviewSchema.post(/^findOneAnd/, async function (doc) {
+  // doc is the document that was updated or deleted
+  if (doc) {
+    await doc.constructor.getReviewStats(doc.tour)
+  }
+})
+
 reviewSchema.pre(/^find/, function () {
   this.populate({
     path: "user",
