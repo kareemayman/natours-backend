@@ -128,7 +128,14 @@ tourSchema.pre(/^find/, function () {
 
 // AGGREGATION MIDDLEWARE
 tourSchema.pre("aggregate", function () {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } })
+  const pipeline = this.pipeline()
+  const firstStage = pipeline[0] ? Object.keys(pipeline[0])[0] : null
+
+  if (firstStage === "$geoNear") {
+    pipeline.splice(1, 0, { $match: { secretTour: { $ne: true } } })
+  } else {
+    pipeline.unshift({ $match: { secretTour: { $ne: true } } })
+  }
 })
 
 // Virtual property: durationWeeks
