@@ -35,6 +35,8 @@ const reviewSchema = new mongoose.Schema(
   },
 )
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true }) // a user can only write one review for a tour
+
 // static methods point to the model itself, not the document instance. So we can use this keyword to refer to the model in static methods
 reviewSchema.statics.getReviewStats = async function (tourId) {
   const stats = await this.aggregate([
