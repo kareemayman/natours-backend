@@ -107,6 +107,7 @@ const tourSchema = new mongoose.Schema(
 
 tourSchema.index({ price: 1, ratingsAverage: -1 })
 tourSchema.index({ slug: 1 })
+tourSchema.index({ startLocation: "2dsphere" }) // for geospatial queries
 
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.pre("save", function () {
